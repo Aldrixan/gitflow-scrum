@@ -42,10 +42,10 @@ init() {
   gitflow_load_settings
   PREFIX=$(git config --get gitflow.prefix.story)
   PS3='Select the sprint branch to use for this story: '
-  select branch in sprint/test-1 $DEVELOP_BRANCH
+  select branch in $(git branch -a | grep 'sprint*') $DEVELOP_BRANCH
   do
 	echo "$BRANCH selected"
-  	SPRINT_BASE= "$BRANCH"
+  	SPRINT_BASE="$BRANCH"
   done
 }
 
