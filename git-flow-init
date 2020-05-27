@@ -244,7 +244,7 @@ cmd_default() {
 	local prefix
 
 	# Sprint branches
-	if ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || flag force; then
+	if ! git config --get gitflow.prefix.sprint >/dev/null 2>&1 || flag force; then
 		default_suggestion=$(git config --get gitflow.prefix.sprint || echo sprint/)
 		printf "Sprint branches? [$default_suggestion] "
 		if noflag defaults; then
@@ -253,11 +253,11 @@ cmd_default() {
 			printf "\n"
 		fi
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git_do config gitflow.prefix.feature "$prefix"
+		git_do config gitflow.prefix.sprint "$prefix"
 	fi
 
 	# Story branches
-	if ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || flag force; then
+	if ! git config --get gitflow.prefix.story >/dev/null 2>&1 || flag force; then
 		default_suggestion=$(git config --get gitflow.prefix.story || echo story/)
 		printf "Story branches? [$default_suggestion] "
 		if noflag defaults; then
@@ -266,7 +266,7 @@ cmd_default() {
 			printf "\n"
 		fi
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git_do config gitflow.prefix.feature "$prefix"
+		git_do config gitflow.prefix.story "$prefix"
 	fi
 
 	# Feature branches
