@@ -44,8 +44,8 @@ init() {
   PS3='Select the sprint branch to use for this story: '
   select branch in $(git branch -a | grep 'sprint*') $DEVELOP_BRANCH
   do
-	echo "$BRANCH selected"
-  	SPRINT_BASE="$BRANCH"
+	echo "$branch selected"
+  	SPRINT_BASE="$branch"
 	break
   done
 }
