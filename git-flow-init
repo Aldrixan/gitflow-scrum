@@ -230,6 +230,8 @@ cmd_default() {
 
 	# finally, ask the user for naming conventions (branch and tag prefixes)
 	if flag force || \
+	   ! git config --get gitflow.prefix.sprint >/dev/null 2>&1 ||
+	   ! git config --get gitflow.prefix.story >/dev/null 2>&1 ||
 	   ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || 
 	   ! git config --get gitflow.prefix.release >/dev/null 2>&1 || 
 	   ! git config --get gitflow.prefix.hotfix >/dev/null 2>&1 || 
@@ -240,6 +242,32 @@ cmd_default() {
 	fi
 
 	local prefix
+
+	# Sprint branches
+	if ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || flag force; then
+		default_suggestion=$(git config --get gitflow.prefix.sprint || echo sprint/)
+		printf "Sprint branches? [$default_suggestion] "
+		if noflag defaults; then
+			read answer
+		else
+			printf "\n"
+		fi
+		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
+		git_do config gitflow.prefix.feature "$prefix"
+	fi
+
+	# Story branches
+	if ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || flag force; then
+		default_suggestion=$(git config --get gitflow.prefix.story || echo story/)
+		printf "Story branches? [$default_suggestion] "
+		if noflag defaults; then
+			read answer
+		else
+			printf "\n"
+		fi
+		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
+		git_do config gitflow.prefix.feature "$prefix"
+	fi
 
 	# Feature branches
 	if ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || flag force; then
