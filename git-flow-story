@@ -42,7 +42,7 @@ init() {
   gitflow_load_settings
   PREFIX=$(git config --get gitflow.prefix.story)
   PS3='Select the sprint branch to use for this story: '
-  select SPRINT_BASE in $(git_do flow sprint list)
+  select SPRINT_BASE in $(git flow sprint list)
 #   SPRINT_BASE=$(git config --get gitflow.base.sprint)
 }
 
