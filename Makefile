@@ -39,6 +39,8 @@ SCRIPT_FILES+=git-flow-hotfix
 SCRIPT_FILES+=git-flow-release
 SCRIPT_FILES+=git-flow-support
 SCRIPT_FILES+=git-flow-version
+SCRIPT_FILES+=git-flow-sprint
+SCRIPT_FILES+=git-flow-story
 SCRIPT_FILES+=gitflow-common
 SCRIPT_FILES+=gitflow-shFlags
 
