@@ -41,7 +41,9 @@ init() {
   require_gitflow_initialized
   gitflow_load_settings
   PREFIX=$(git config --get gitflow.prefix.story)
-  BASE=$(git config --get gitflow.base.sprint)
+  PS3='Select the sprint branch to use for this story: '
+  select SPRINT_BASE in $(git_do flow sprint list)
+#   SPRINT_BASE=$(git config --get gitflow.base.sprint)
 }
 
 usage() {
@@ -205,23 +207,23 @@ cmd_start() {
 
 	# update the local repo with remote changes, if asked
 	if flag fetch; then
-		git_do fetch -q "$ORIGIN" "$BASE"
+		git_do fetch -q "$ORIGIN" "$SPRINT_BASE"
 	fi
 
 	# if the origin branch counterpart exists, assert that the local branch
 	# isn't behind it (to avoid unnecessary rebasing)
-	if git_branch_exists "$ORIGIN/$BASE"; then
-		require_branches_equal "$BASE" "$ORIGIN/$BASE"
+	if git_branch_exists "$ORIGIN/$SPRINT_BASE"; then
+		require_branches_equal "$SPRINT_BASE" "$ORIGIN/$SPRINT_BASE"
 	fi
 
 	# create branch
-	if ! git_do checkout -b "$BRANCH" "$BASE"; then
+	if ! git_do checkout -b "$BRANCH" "$SPRINT_BASE"; then
 		die "Could not create story branch '$BRANCH'"
 	fi
 
 	echo
 	echo "Summary of actions:"
-	echo "- A new branch '$BRANCH' was created, based on '$BASE'"
+	echo "- A new branch '$BRANCH' was created, based on '$SPRINT_BASE'"
 	echo "- You are now on branch '$BRANCH'"
 	echo ""
 	echo "Now, start committing on your story. When done, use:"
@@ -289,31 +291,31 @@ cmd_finish() {
 	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
 		if flag fetch; then
 			git_do fetch -q "$ORIGIN" "$BRANCH"
-			git_do fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
+			git_do fetch -q "$ORIGIN" "$SPRINT_BASE"
 		fi
 	fi
 
 	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
 		require_branches_equal "$BRANCH" "$ORIGIN/$BRANCH"
 	fi
-	if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
-		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+	if has "$ORIGIN/$SPRINT_BASE" $(git_remote_branches); then
+		require_branches_equal "$SPRINT_BASE" "$ORIGIN/$SPRINT_BASE"
 	fi
 
 	# if the user wants to rebase, do that first
 	if flag rebase; then
-		if ! git flow story rebase "$NAME" "$DEVELOP_BRANCH"; then
+		if ! git flow story rebase "$NAME" "$SPRINT_BASE"; then
 			warn "Finish was aborted due to conflicts during rebase."
 			warn "Please finish the rebase manually now."
 			warn "When finished, re-run:"
-			warn "    git flow story finish '$NAME' '$DEVELOP_BRANCH'"
+			warn "    git flow story finish '$NAME' '$SPRINT_BASE'"
 			exit 1
 		fi
 	fi
 
 	# merge into BASE
-	git_do checkout "$DEVELOP_BRANCH"
-	if [ "$(git rev-list -n2 "$DEVELOP_BRANCH..$BRANCH" | wc -l)" -eq 1 ]; then
+	git_do checkout "$SPRINT_BASE"
+	if [ "$(git rev-list -n2 "$SPRINT_BASE..$BRANCH" | wc -l)" -eq 1 ]; then
 		git_do merge --ff "$BRANCH"
 	else
 		if noflag squash; then
@@ -329,7 +331,7 @@ cmd_finish() {
 		# oops.. we have a merge conflict!
 		# write the given $DEVELOP_BRANCH to a temporary file (we need it later)
 		mkdir -p "$DOT_GIT_DIR/.gitflow"
-		echo "$DEVELOP_BRANCH" > "$DOT_GIT_DIR/.gitflow/MERGE_BASE"
+		echo "$SPRINT_BASE" > "$DOT_GIT_DIR/.gitflow/MERGE_BASE"
 		echo
 		echo "There were merge conflicts. To resolve the merge conflict manually, use:"
 		echo "    git mergetool"
@@ -366,14 +368,14 @@ helper_finish_cleanup() {
 
 	echo
 	echo "Summary of actions:"
-	echo "- The story branch '$BRANCH' was merged into '$DEVELOP_BRANCH'"
+	echo "- The story branch '$BRANCH' was merged into '$SPRINT_BASE'"
 	#echo "- Merge conflicts were resolved"		# TODO: Add this line when it's supported
 	if flag keep; then
 		echo "- Story branch '$BRANCH' is still available"
 	else
 		echo "- Story branch '$BRANCH' has been removed"
 	fi
-	echo "- You are now on branch '$DEVELOP_BRANCH'"
+	echo "- You are now on branch '$SPRINT_BASE'"
 	echo
 }
 
@@ -429,14 +431,14 @@ cmd_diff() {
 
 	if [ "$NAME" != "" ]; then
 		expand_nameprefix_arg
-		BASE=$(git merge-base "$DEVELOP_BRANCH" "$BRANCH")
+		BASE=$(git merge-base "$SPRINT_BASE" "$BRANCH")
 		git diff "$BASE..$BRANCH"
 	else
 		if ! git_current_branch | grep -q "^$PREFIX"; then
 			die "Not on a story branch. Name one explicitly."
 		fi
 
-		BASE=$(git merge-base "$DEVELOP_BRANCH" HEAD)
+		BASE=$(git merge-base "$SPRINT_BASE" HEAD)
 		git diff "$BASE"
 	fi
 }
@@ -470,7 +472,7 @@ cmd_rebase() {
 	if flag interactive; then
 		OPTS="$OPTS -i"
 	fi
-	git_do rebase $OPTS "$DEVELOP_BRANCH"
+	git_do rebase $OPTS "$SPRINT_BASE"
 }
 
 avoid_accidental_cross_branch_action() {

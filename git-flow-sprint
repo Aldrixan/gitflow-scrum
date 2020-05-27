@@ -342,6 +342,8 @@ cmd_finish() {
 		exit 1
 	fi
 
+	git_do config gitflow.base.sprint "$DEVELOP_BRANCH"
+
 	# when no merge conflict is detected, just clean up the sprint branch
 	helper_finish_cleanup
 }
