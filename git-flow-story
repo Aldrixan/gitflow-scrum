@@ -381,10 +381,10 @@ helper_finish_cleanup() {
 	echo "Summary of actions:"
 	echo "- The story branch '$BRANCH' was merged into '$SPRINT_BASE'"
 	#echo "- Merge conflicts were resolved"		# TODO: Add this line when it's supported
-	if flag keep; then
-		echo "- Story branch '$BRANCH' is still available"
-	else
+	if flag delete; then
 		echo "- Story branch '$BRANCH' has been removed"
+	else
+		echo "- Story branch '$BRANCH' is still available"
 	fi
 	echo "- You are now on branch '$SPRINT_BASE'"
 	echo
