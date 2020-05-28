@@ -367,6 +367,24 @@ helper_finish_cleanup() {
 		fi
 	fi
 
+	STORY_PREFIX=$(git config --get gitflow.prefix.story)
+	PS3='Select the story branches to cleanup: '
+	# local branches_array=$(git_local_branches | grep "$STORY_PREFIX")
+	local removed_branches=()
+	select branch in $(git_local_branches | grep "$STORY_PREFIX") quit
+	do
+		case $branch in 
+		"quit")
+			break;
+		*)
+			if flag force_delete; then
+				git_do branch -D "$branch"
+			else
+				git_do branch -d "$branch"
+			fi
+			removed_branches+=($branch)
+	done
+
 	echo
 	echo "Summary of actions:"
 	echo "- The sprint branch '$BRANCH' was merged into '$DEVELOP_BRANCH'"
@@ -376,6 +394,10 @@ helper_finish_cleanup() {
 	else
 		echo "- Sprint branch '$BRANCH' has been removed"
 	fi
+	for b in $removed_branches
+	do
+		echo "-- Story branch '$b' has been removed"
+	done
 	echo "- You are now on branch '$DEVELOP_BRANCH'"
 	echo
 }

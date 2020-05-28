@@ -46,7 +46,6 @@ init() {
   local branches_array=$(git_local_branches | grep "$SPRINT_PREFIX")
   select branch in ${branches_array} $DEVELOP_BRANCH
   do
-	echo "$branch selected"
   	SPRINT_BASE="$branch"
 	break
   done
@@ -241,7 +240,7 @@ cmd_start() {
 cmd_finish() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
 	DEFINE_boolean rebase false "rebase instead of merge" r
-	DEFINE_boolean keep false "keep branch after performing finish" k
+	DEFINE_boolean delete false "keep branch after performing finish" d
 	DEFINE_boolean force_delete false "force delete story branch after finish" D
 	DEFINE_boolean squash false "squash story during merge" S
 	parse_args "$@"
@@ -364,7 +363,7 @@ helper_finish_cleanup() {
 	fi
 	
 	
-	if noflag keep; then
+	if flag delete; then
 		if flag force_delete; then
 			git_do branch -D "$BRANCH"
 		else
