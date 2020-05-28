@@ -234,6 +234,8 @@ cmd_start() {
 	echo ""
 	echo "     git flow sprint finish $NAME"
 	echo
+
+	cmd_publish
 }
 
 cmd_finish() {
@@ -358,20 +360,7 @@ helper_finish_cleanup() {
 	require_branch "$BRANCH"
 	require_clean_working_tree
 
-	# delete branch
-	if flag fetch; then
-		git_do push "$ORIGIN" ":refs/heads/$BRANCH"
-	fi
-	
-	
-	if noflag keep; then
-		if flag force_delete; then
-			git_do branch -D "$BRANCH"
-		else
-			git_do branch -d "$BRANCH"
-		fi
-	fi
-
+	echo
 	STORY_PREFIX=$(git config --get gitflow.prefix.story)
 	PS3='Select the story branches to cleanup: '
 	# local branches_array=$(git_local_branches | grep "$STORY_PREFIX")
@@ -393,6 +382,20 @@ helper_finish_cleanup() {
 		esac
 	done
 
+	# delete branch
+	if flag fetch; then
+		git_do push "$ORIGIN" ":refs/heads/$BRANCH"
+	fi
+	
+	
+	if noflag keep; then
+		if flag force_delete; then
+			git_do branch -D "$BRANCH"
+		else
+			git_do branch -d "$BRANCH"
+		fi
+	fi
+
 	echo
 	echo "Summary of actions:"
 	echo "- The sprint branch '$BRANCH' was merged into '$DEVELOP_BRANCH'"
@@ -404,7 +407,7 @@ helper_finish_cleanup() {
 	fi
 	for b in "${removed_branches[@]}"
 	do
-		echo "-- Story branch '$b' has been removed"
+		echo "- Story branch '$b' has been removed"
 	done
 	echo "- You are now on branch '$DEVELOP_BRANCH'"
 	echo

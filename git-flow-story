@@ -241,6 +241,8 @@ cmd_start() {
 	echo ""
 	echo "     git flow story finish $NAME"
 	echo
+
+	cmd_publish
 }
 
 cmd_finish() {
