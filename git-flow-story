@@ -1,4 +1,4 @@
-#
+#!/bin/bash
 # git-flow -- A collection of Git extensions to provide high-level
 # repository operations for Vincent Driessen's branching model.
 #
@@ -43,7 +43,8 @@ init() {
   PREFIX=$(git config --get gitflow.prefix.story)
   SPRINT_PREFIX=$(git config --get gitflow.prefix.sprint)
   PS3='Select the sprint branch to use for this story: '
-  local branches_array=$(git_local_branches | grep "$SPRINT_PREFIX")
+  local branches_array
+  branches_array=$(git_local_branches | grep "$SPRINT_PREFIX")
   select branch in ${branches_array} $DEVELOP_BRANCH
   do
   	SPRINT_BASE="$branch"
@@ -74,7 +75,7 @@ cmd_list() {
 	local story_branches
 	local current_branch
 	local short_names
-	story_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+	story_branches=$(git_local_branches | grep "^$PREFIX")
 	if [ -z "$story_branches" ]; then
 		warn "No story branches exist."
 		warn ""
@@ -85,23 +86,27 @@ cmd_list() {
 		exit 0
 	fi
 	current_branch=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
-	short_names=$(echo "$story_branches" | sed "s ^$PREFIX  g")
+	short_names=$("$story_branches" | sed "s ^$PREFIX  g")
 
 	# determine column width first
 	local width=0
 	local branch
 	for branch in $short_names; do
 		local len=${#branch}
-		width=$(max $width $len)
+		width=$(max $width "$len")
 	done
-	width=$(($width+3))
+	width=$("$width"+3)
 
 	local branch
 	for branch in $short_names; do
-		local fullname=$PREFIX$branch
-		local base=$(git merge-base "$fullname" "$BASE")
-		local develop_sha=$(git rev-parse "$BASE")
-		local branch_sha=$(git rev-parse "$fullname")
+	        local fullname
+	        local base
+	        local develop_sha
+	        local branch_sha
+		fullname=$PREFIX$branch
+		base=$(git merge-base "$fullname" "$BASE")
+		develop_sha=$(git rev-parse "$BASE")
+		branch_sha=$(git rev-parse "$fullname")
 		if [ "$fullname" = "$current_branch" ]; then
 			printf "* "
 		else
@@ -154,7 +159,8 @@ expand_nameprefix_arg() {
 }
 
 use_current_story_branch_name() {
-	local current_branch=$(git_current_branch)
+        local current_branch
+	current_branch=$(git_current_branch)
 	if startswith "$current_branch" "$PREFIX"; then
 		BRANCH=$current_branch
 		NAME=${BRANCH#$PREFIX}
@@ -293,17 +299,17 @@ cmd_finish() {
 	require_clean_working_tree
 
 	# update local repo with remote changes first, if asked
-	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
+	if has "$ORIGIN/$BRANCH" "$(git_remote_branches)"; then
 		if flag fetch; then
 			git_do fetch -q "$ORIGIN" "$BRANCH"
 			git_do fetch -q "$ORIGIN" "$SPRINT_BASE"
 		fi
 	fi
 
-	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
+	if has "$ORIGIN/$BRANCH" "$(git_remote_branches)"; then
 		require_branches_equal "$BRANCH" "$ORIGIN/$BRANCH"
 	fi
-	if has "$ORIGIN/$SPRINT_BASE" $(git_remote_branches); then
+	if has "$ORIGIN/$SPRINT_BASE" "$(git_remote_branches)"; then
 		require_branches_equal "$SPRINT_BASE" "$ORIGIN/$SPRINT_BASE"
 	fi
 
@@ -477,11 +483,12 @@ cmd_rebase() {
 	if flag interactive; then
 		OPTS="$OPTS -i"
 	fi
-	git_do rebase $OPTS "$SPRINT_BASE"
+	git_do rebase "$OPTS" "$SPRINT_BASE"
 }
 
 avoid_accidental_cross_branch_action() {
-	local current_branch=$(git_current_branch)
+        local current_branch
+	current_branch=$(git_current_branch)
 	if [ "$BRANCH" != "$current_branch" ]; then
 		warn "Trying to pull from '$BRANCH' while currently on branch '$current_branch'."
 		warn "To avoid unintended merges, git-flow aborted."
@@ -491,7 +498,6 @@ avoid_accidental_cross_branch_action() {
 }
 
 cmd_pull() {
-	#DEFINE_string prefix false 'alternative remote story branch name prefix' p
 	DEFINE_boolean rebase false "pull with rebase" r
 	parse_remote_name "$@"
 
@@ -503,7 +509,8 @@ cmd_pull() {
 	# To avoid accidentally merging different story branches into each other,
 	# die if the current story branch differs from the requested $NAME
 	# argument.
-	local current_branch=$(git_current_branch)
+	local current_branch
+	current_branch=$(git_current_branch)
 	if startswith "$current_branch" "$PREFIX"; then
 		# we are on a local story branch already, so $BRANCH must be equal to
 		# the current branch
