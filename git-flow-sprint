@@ -235,7 +235,7 @@ cmd_start() {
 	echo "     git flow sprint finish $NAME"
 	echo
 
-	cmd_publish
+	cmd_publish $@
 }
 
 cmd_finish() {
