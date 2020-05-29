@@ -360,27 +360,27 @@ helper_finish_cleanup() {
 	require_branch "$BRANCH"
 	require_clean_working_tree
 
-	echo
-	STORY_PREFIX=$(git config --get gitflow.prefix.story)
-	PS3='Select the story branches to cleanup: '
-	# local branches_array=$(git_local_branches | grep "$STORY_PREFIX")
-	local removed_branches=()
-	select branch in $(git_local_branches | grep "$STORY_PREFIX") quit
-	do
-		case $branch in 
-		"quit")
-			break
-		        ;;
-		*)
-			if flag force_delete; then
-				git_do branch -D "$branch"
-			else
-				git_do branch -d "$branch"
-			fi
-			removed_branches+=("$branch")
-			;;
-		esac
-	done
+	# echo
+	# STORY_PREFIX=$(git config --get gitflow.prefix.story)
+	# PS3='Select the story branches to cleanup: '
+	# # local branches_array=$(git_local_branches | grep "$STORY_PREFIX")
+	# local removed_branches=()
+	# select branch in $(git_local_branches | grep "$STORY_PREFIX") quit
+	# do
+	# 	case $branch in 
+	# 	"quit")
+	# 		break
+	# 	        ;;
+	# 	*)
+	# 		if flag force_delete; then
+	# 			git_do branch -D "$branch"
+	# 		else
+	# 			git_do branch -d "$branch"
+	# 		fi
+	# 		removed_branches+=("$branch")
+	# 		;;
+	# 	esac
+	# done
 
 	# delete branch
 	if flag fetch; then
@@ -405,10 +405,10 @@ helper_finish_cleanup() {
 	else
 		echo "- Sprint branch '$BRANCH' has been removed"
 	fi
-	for b in "${removed_branches[@]}"
-	do
-		echo "- Story branch '$b' has been removed"
-	done
+	# for b in "${removed_branches[@]}"
+	# do
+	# 	echo "- Story branch '$b' has been removed"
+	# done
 	echo "- You are now on branch '$DEVELOP_BRANCH'"
 	echo
 }
